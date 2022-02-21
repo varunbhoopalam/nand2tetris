@@ -10,3 +10,35 @@
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
 // Put your code here.
+
+    @R1
+    D=M
+
+    @Index
+    M=D
+
+    @R2
+    M=0
+
+  (LOOP)
+    @Index
+    D=M
+
+    @END
+    D;JEQ   // if index = 0 go to end
+
+    @R0
+    D=M
+
+    @R2
+    M=D+M   // r2 = r2 + r0
+
+    @Index
+    M=M-1   // index = index - 1
+
+    @LOOP
+    0;JMP   // go to beginning of loop
+
+  (END)
+    @END
+    0;JMP   // infinite loop
