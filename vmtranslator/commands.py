@@ -11,3 +11,8 @@ class CommandNameEnum(str, Enum):
     C_FUNCTION = "C_FUNCTION"
     C_RETURN = "C_RETURN"
     C_CALL = "C_CALL"
+
+
+class Command:
+    type: CommandNameEnum
+    content: str
