@@ -8,6 +8,7 @@ class CodeWriter:
 
     def __init__(self, output_file: TextIO):
         self.output_file = output_file
+        self.label_number = 0
 
     def write_arithmetic(self, command: str) -> None:
         """
@@ -18,15 +19,23 @@ class CodeWriter:
         self.output_file.write(f'// {command}')
         match command:
             case "add":
-                pass
+                self._arith_multi_param("M+D")
+            case "sub":
+                self._arith_multi_param("M-D")
+            case "neg":
+                self._arith_single_param("-M")
             case "eq":
-                pass
+                self._arith_jump_logic("JEQ")
             case "gt":
-                pass
+                self._arith_jump_logic("JGT")
             case "lt":
-                pass
+                self._arith_jump_logic("JLT")
+            case "and":
+                self._arith_multi_param("D&M")
+            case "or":
+                self._arith_multi_param("D|M")
             case "not":
-                pass
+                self._arith_single_param("!M")
             case _:
                 pass
 
@@ -174,3 +183,40 @@ class CodeWriter:
 
     def _write(self, text: str):
         self.output_file.write(text+"\n")
+
+    def _create_label(self):
+        self.label_number += 1
+        return f"LABEL{self.label_number}"
+
+    def _decrement_segment_pointer_and_go_to_memory_address_one_below_sp(self):
+        self._write("@SP")
+        self._write("M=M-1")  # set stack pointer to one lower
+        self._write("A=M")
+        self._write("D=M")  # get latest value in stack to D register
+        self._write("A=A-1")  # A register to second latest value in stack
+
+    def _arith_multi_param(self, return_value: str):
+        self._decrement_segment_pointer_and_go_to_memory_address_one_below_sp()
+        self._write(f"M={return_value}")  # do calculation
+
+    def _arith_jump_logic(self, jump_condition: str):
+        jump_label: str = self._create_label()
+        end_label: str = self._create_label()
+        self._decrement_segment_pointer_and_go_to_memory_address_one_below_sp()
+        self._write("D=M-D")  # do calculation
+        self._write(f"@{jump_label}")
+        self._write(f"D;{jump_condition}")
+        self._write(f"@{end_label}")
+        self._write("0;JMP")
+        self._write(f"({jump_label})")
+        self._write("@SP")
+        self._write("A=M")
+        self._write("A=A-1")
+        self._write("M=1")
+        self._write(f"({end_label})")
+
+    def _arith_single_param(self, return_value: str):
+        self._write("@SP")
+        self._write("A=M")
+        self._write("A=A-1")
+        self._write(f"M={return_value}")
