@@ -1,6 +1,6 @@
 from typing import TextIO
 
-from vmtranslator.commands import CommandNameEnum
+from commands import CommandNameEnum
 
 
 class CodeWriter:

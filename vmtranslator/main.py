@@ -2,9 +2,9 @@ from pathlib import Path
 from sys import argv
 from typing import TextIO
 
-from vmtranslator.codewriter import CodeWriter
-from vmtranslator.commands import CommandNameEnum
-from vmtranslator.parser import Parser
+from codewriter import CodeWriter
+from commands import CommandNameEnum
+from parser import Parser
 
 
 def main():
@@ -20,8 +20,9 @@ def main():
         return
 
     with open(path, "r") as input_file:
-        path.suffix = ".hack"
-        write_file: TextIO = open(path)
+        output_path: str = input_path.replace(".vm", ".hack")
+        print(f"writing to {output_path}")
+        write_file: TextIO = open(output_path, "w+")
         code_writer: CodeWriter = CodeWriter(write_file)
 
         parser: Parser = Parser(input_file)
@@ -30,22 +31,14 @@ def main():
         while parser.has_more_commands():
             match parser.command_type():
                 case CommandNameEnum.C_ARITHMETIC:
-                    pass
-                case CommandNameEnum.C_PUSH:
-                    pass
-                case CommandNameEnum.C_POP:
-                    pass
+                    code_writer.write_arithmetic(parser.arg1())
+                case CommandNameEnum.C_PUSH | CommandNameEnum.C_POP:
+                    code_writer.write_push_pop(parser.command_type(), parser.arg1(), parser.arg2())
                 case _:
-                    pass
+                    raise Exception
             parser.advance()
 
     code_writer.close()
 
-
-#get input file from command line arg
-
-#construct parser to handle input file
-
-#construct codewriter to handle output file
-
-#march through input file, parse each line generating code from it
+if __name__ == "__main__":
+    main()

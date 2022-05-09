@@ -1,6 +1,6 @@
-from typing import TextIO, Optional, List
+from typing import TextIO, Optional
 
-from vmtranslator.commands import CommandNameEnum
+from commands import CommandNameEnum
 
 
 class Parser:
@@ -15,7 +15,7 @@ class Parser:
         """
         Are there more commands in the input?
         """
-        return self._eof
+        return not self._eof
 
     def advance(self) -> None:
         """
@@ -26,7 +26,7 @@ class Parser:
         if self._eof:
             return
 
-        line: str = self.input_file.readline(1)
+        line: str = self.input_file.readline()
 
         if not line:
             self._eof = True
@@ -44,15 +44,16 @@ class Parser:
         C_ARITHMETIC is returned for all the arithmetic/logical commands.
         :return: CommandNameEnum
         """
-        match self._current_command.split(" ")[0]:
+        command: str = self._current_command.split(" ")[0]
+        match command:
             case "push":
                 return CommandNameEnum.C_PUSH
             case "pop":
                 return CommandNameEnum.C_POP
-            case ("add" | "eq" | "gt" | "lt" | "not"):
+            case ("add" | "sub" | "neg" | "eq" | "gt" | "lt" | "and"| "or" | "not"):
                 return CommandNameEnum.C_ARITHMETIC
             case _:
-                raise Exception("unimplemented")
+                raise Exception(f"unimplemented command | {command}")
 
     def arg1(self) -> str:
         """
@@ -61,9 +62,13 @@ class Parser:
         Shoudl not be called if the current command is C_RETURN
         :return: str
         """
-        if self.command_type() == CommandNameEnum.C_RETURN:
-            raise Exception("arg1 should not be called if the current command is C_RETURN")
-        return self._current_command.split(" ")[0]
+        match self.command_type():
+            case CommandNameEnum.C_RETURN:
+                raise Exception("arg1 should not be called if the current command is C_RETURN")
+            case CommandNameEnum.C_ARITHMETIC:
+                return self._current_command.split(" ")[0]
+            case _:
+                return self._current_command.split(" ")[1]
 
     def arg2(self) -> int:
         """
@@ -74,7 +79,7 @@ class Parser:
         if not self.command_type() in [CommandNameEnum.C_PUSH, CommandNameEnum.C_POP, CommandNameEnum.C_FUNCTION,
                                        CommandNameEnum.C_CALL]:
             raise Exception("arg2 should be called only if the current command is C_PUSH, C_POP, C_FUNCTION, or C_CALL")
-        return int(self._current_command.split(" ")[1])
+        return int(self._current_command.split(" ")[2])
 
     @staticmethod
     def _parse_command(command: str) -> str:
