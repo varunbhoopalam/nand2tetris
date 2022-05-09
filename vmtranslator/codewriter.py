@@ -38,7 +38,7 @@ class CodeWriter:
         :param index: int
         :return:
         """
-        self._write(f'// {command}')
+        self._write(f'// {command} {segment} {index}')
         match command:
             case CommandNameEnum.C_POP:
                 match segment:
@@ -72,7 +72,7 @@ class CodeWriter:
                             case _:
                                 raise Exception
                     case _:
-                        pass
+                        raise Exception
             case CommandNameEnum.C_PUSH:
                 match segment:
                     case "local":
@@ -118,9 +118,9 @@ class CodeWriter:
                         self._write("D=M")
                         self._write_to_stack_and_increment_stack_pointer()
                     case _:
-                        pass
+                        raise Exception
             case _:
-                pass
+                raise Exception
 
     def close(self) -> None:
         """
@@ -173,4 +173,4 @@ class CodeWriter:
         self._write("D=M")
 
     def _write(self, text: str):
-        self.output_file.write(text)
+        self.output_file.write(text+"\n")
