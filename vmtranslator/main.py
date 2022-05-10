@@ -20,7 +20,7 @@ def main():
         return
 
     with open(path, "r") as input_file:
-        output_path: str = input_path.replace(".vm", ".hack")
+        output_path: str = input_path.replace(".vm", ".asm")
         print(f"writing to {output_path}")
         write_file: TextIO = open(output_path, "w+")
         code_writer: CodeWriter = CodeWriter(write_file)
