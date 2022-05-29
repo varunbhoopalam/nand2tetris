@@ -52,6 +52,18 @@ class Parser:
                 return CommandNameEnum.C_POP
             case ("add" | "sub" | "neg" | "eq" | "gt" | "lt" | "and"| "or" | "not"):
                 return CommandNameEnum.C_ARITHMETIC
+            case "goto":
+                return CommandNameEnum.C_GOTO
+            case "if-goto":
+                return CommandNameEnum.C_IF
+            case "label":
+                return CommandNameEnum.C_LABEL
+            case "call":
+                return CommandNameEnum.C_CALL
+            case "function":
+                return CommandNameEnum.C_FUNCTION
+            case "return":
+                return CommandNameEnum.C_RETURN
             case _:
                 raise Exception(f"unimplemented command | {command}")
 
